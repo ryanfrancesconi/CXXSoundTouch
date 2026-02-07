@@ -1,9 +1,11 @@
+
 #import <iostream>
 
 #import "BPMDetect.h"
 #import "BPMDetectC.h"
 #import "STTypes.h"
 
+/// objc++ wrapper on soundtouch BPMDetect for swift
 @implementation BPMDetectC {
     soundtouch::BPMDetect *_bpmDetect;
 }
@@ -24,18 +26,10 @@
 }
 
 - (float)getBpm {
-    float value = _bpmDetect->getBpm();
-
-    if (value < 60) {
-        value *= 2;
-    }
-
-    return value;
+    return _bpmDetect->getBpm();
 }
 
 - (void)dealloc {
-    std::cout << "dealloc BPMDetectC.mm" << std::endl;
-
     if (_bpmDetect) {
         delete _bpmDetect;
         _bpmDetect = nullptr;

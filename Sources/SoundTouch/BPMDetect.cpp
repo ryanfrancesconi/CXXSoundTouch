@@ -224,7 +224,7 @@ BPMDetect::BPMDetect(int numChannels, int aSampleRate) : beat_lpf(_LPF_coeffs) {
 }
 
 BPMDetect::~BPMDetect() {
-    std::cout << "~BPMDetect.cpp" << std::endl;
+    // std::cout << "~BPMDetect.cpp" << std::endl;
 
     delete[] xcorr;
     delete[] beatcorr_ringbuff;
@@ -548,6 +548,11 @@ float BPMDetect::getBpm() {
 
     // calculate BPM
     float bpm = (float)(coeff / peakPos);
+
+    if (bpm < 60) {
+        bpm *= 2;
+    }
+
     return (bpm >= MIN_BPM && bpm <= MAX_BPM_VALID) ? bpm : 0;
 }
 
