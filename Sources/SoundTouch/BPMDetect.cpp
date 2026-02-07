@@ -51,6 +51,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#import <iostream>
+
 #define _USE_MATH_DEFINES
 
 #include "BPMDetect.h"
@@ -222,6 +224,8 @@ BPMDetect::BPMDetect(int numChannels, int aSampleRate) : beat_lpf(_LPF_coeffs) {
 }
 
 BPMDetect::~BPMDetect() {
+    std::cout << "~BPMDetect.cpp" << std::endl;
+
     delete[] xcorr;
     delete[] beatcorr_ringbuff;
     delete[] hamw;
@@ -314,13 +318,12 @@ void BPMDetect::updateXCorr(int process_samples) {
         sum = 0;
 
         for (i = 0; i < process_samples; i++) {
-            sum += tmp[i] * pBuffer[i + offs]; // scaling the sub-result
-                                               // shouldn't be necessary
+            // scaling the sub-result shouldn't be necessary
+            sum += tmp[i] * pBuffer[i + offs];
         }
 
-        xcorr[offs] *=
-            xcorr_decay; // decay 'xcorr' here with suitable time constant.
-
+        // decay 'xcorr' here with suitable time constant.
+        xcorr[offs] *= xcorr_decay;
         xcorr[offs] += (float)fabs(sum);
     }
 }
@@ -354,9 +357,9 @@ void BPMDetect::updateBeatPos(int process_samples) {
             sum += tmp[i] * pBuffer[offs + i];
         }
 
+        // accumulate only positive correlations
         beatcorr_ringbuff[(beatcorr_ringbuffpos + offs) % windowLen] +=
-            (float)((sum > 0) ? sum
-                              : 0); // accumulate only positive correlations
+            (float)((sum > 0) ? sum : 0);
     }
 
     int skipstep = XCORR_UPDATE_SEQUENCE / OVERLAP_FACTOR;
@@ -560,10 +563,10 @@ float BPMDetect::getBpm() {
 ///
 /// \return number of beats in the arrays.
 int BPMDetect::getBeats(float *pos, float *values, int max_num) {
-    size_t num = beats.size();
+    int num = (int)beats.size();
 
     if ((!pos) || (!values)) {
-        return (int)num; // pos or values NULL, return just size
+        return num; // pos or values NULL, return just size
     }
 
     for (int i = 0; (i < num) && (i < max_num); i++) {
@@ -571,5 +574,5 @@ int BPMDetect::getBeats(float *pos, float *values, int max_num) {
         values[i] = beats[i].strength;
     }
 
-    return (int)num;
+    return num;
 }

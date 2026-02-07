@@ -41,7 +41,9 @@ using namespace soundtouch;
 
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 
-PeakFinder::PeakFinder() { minPos = maxPos = 0; }
+PeakFinder::PeakFinder() {
+    minPos = maxPos = 0;
+}
 
 // Finds real 'top' of a peak hump from neighnourhood of the given 'peakpos'.
 int PeakFinder::findTop(const float *data, int peakpos) const {
@@ -53,11 +55,16 @@ int PeakFinder::findTop(const float *data, int peakpos) const {
 
     // seek within �10 points
     start = peakpos - 10;
-    if (start < minPos)
+
+    if (start < minPos) {
         start = minPos;
+    }
+
     end = peakpos + 10;
-    if (end > maxPos)
+
+    if (end > maxPos) {
         end = maxPos;
+    }
 
     for (i = start; i <= end; i++) {
         if (data[i] > refvalue) {
@@ -68,8 +75,9 @@ int PeakFinder::findTop(const float *data, int peakpos) const {
 
     // failure if max value is at edges of seek range => it's not peak, it's at
     // slope.
-    if ((peakpos == start) || (peakpos == end))
+    if ((peakpos == start) || (peakpos == end)) {
         return 0;
+    }
 
     return peakpos;
 }
@@ -99,6 +107,7 @@ int PeakFinder::findGround(const float *data, int peakpos,
 
         // calculate derivate
         delta = data[pos] - data[prevpos];
+
         if (delta <= 0) {
             // going downhill, ok
             if (climb_count) {
@@ -114,9 +123,12 @@ int PeakFinder::findGround(const float *data, int peakpos,
         } else {
             // going uphill, increase climbing counter
             climb_count++;
-            if (climb_count > 5)
+
+            if (climb_count > 5) {
                 break; // we've been climbing too long => it's next uphill =>
-                       // quit
+            }
+
+            // quit
         }
     }
     return lowpos;
@@ -132,9 +144,12 @@ int PeakFinder::findCrossingLevel(const float *data, float level, int peakpos,
     peaklevel = data[peakpos];
     assert(peaklevel >= level);
     pos = peakpos;
+
     while ((pos >= minPos) && (pos + direction < maxPos)) {
-        if (data[pos + direction] < level)
+        if (data[pos + direction] < level) {
             return pos; // crossing found
+        }
+
         pos += direction;
     }
     return -1; // not found
@@ -150,13 +165,16 @@ double PeakFinder::calcMassCenter(const float *data, int firstPos,
 
     sum = 0;
     wsum = 0;
+
     for (i = firstPos; i <= lastPos; i++) {
         sum += (float)i * data[i];
         wsum += data[i];
     }
 
-    if (wsum < 1e-6)
+    if (wsum < 1e-6) {
         return 0;
+    }
+
     return sum / wsum;
 }
 
@@ -192,15 +210,15 @@ double PeakFinder::getPeakCenter(const float *data, int peakpos) const {
     crosspos1 = findCrossingLevel(data, cutLevel, peakpos, -1);
     crosspos2 = findCrossingLevel(data, cutLevel, peakpos, 1);
 
-    if ((crosspos1 < 0) || (crosspos2 < 0))
+    if ((crosspos1 < 0) || (crosspos2 < 0)) {
         return 0; // no crossing, no peak..
+    }
 
     // calculate mass center of the peak surroundings
     return calcMassCenter(data, crosspos1, crosspos2);
 }
 
 double PeakFinder::detectPeak(const float *data, int aminPos, int amaxPos) {
-
     int i;
     int peakpos; // position of peak level
     double highPeak, peak;
@@ -211,6 +229,7 @@ double PeakFinder::detectPeak(const float *data, int aminPos, int amaxPos) {
     // find absolute peak
     peakpos = minPos;
     peak = data[minPos];
+
     for (i = minPos + 1; i < maxPos; i++) {
         if (data[i] > peak) {
             peak = data[i];
@@ -233,11 +252,16 @@ double PeakFinder::detectPeak(const float *data, int aminPos, int amaxPos) {
 
         harmonic = (double)pow(2.0, i);
         peakpos = (int)(highPeak / harmonic + 0.5f);
-        if (peakpos < minPos)
+
+        if (peakpos < minPos) {
             break;
+        }
+
         peakpos = findTop(data, peakpos); // seek true local maximum index
-        if (peakpos == 0)
+
+        if (peakpos == 0) {
             continue; // no local max here
+        }
 
         // calculate mass-center of possible harmonic peak
         peaktmp = getPeakCenter(data, peakpos);
@@ -248,12 +272,15 @@ double PeakFinder::detectPeak(const float *data, int aminPos, int amaxPos) {
         // (c) has at least half x-corr value of the max. peak
 
         double diff = harmonic * peaktmp / highPeak;
-        if ((diff < 0.96) || (diff > 1.04))
+
+        if ((diff < 0.96) || (diff > 1.04)) {
             continue; // peak too afar from expected
+        }
 
         // now compare to highest detected peak
         i1 = (int)(highPeak + 0.5);
         i2 = (int)(peaktmp + 0.5);
+
         if (data[i2] >= 0.4 * data[i1]) {
             // The harmonic is at least half as high primary peak,
             // thus use the harmonic peak instead

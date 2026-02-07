@@ -1,39 +1,44 @@
+#import <iostream>
 
 #import "BPMDetect.h"
+#import "BPMDetectC.h"
 #import "STTypes.h"
 
-#include "BPMDetectC.h"
+@implementation BPMDetectC {
+    soundtouch::BPMDetect *_bpmDetect;
+}
 
-@implementation BPMDetectC
-
-soundtouch::BPMDetect *bpmDetect;
-
-- (id)init {
+- (id)initWithSampleRate:(int)sampleRate
+        numberOfChannels:(int)numberOfChannels {
     self = [super init];
+
+    if (self) {
+        _bpmDetect = new soundtouch::BPMDetect(numberOfChannels, sampleRate);
+    }
 
     return self;
 }
 
-- (void)process:(const float *)data
-     numberOfSamples:(int)numberOfSamples
-    numberOfChannels:(int)numberOfChannels
-          sampleRate:(int)sampleRate {
-    if (bpmDetect == nullptr) {
-        bpmDetect = new soundtouch::BPMDetect(numberOfChannels, sampleRate);
-    }
-
-    //
-    bpmDetect->inputSamples(data, numberOfSamples);
+- (void)process:(const float *)data numberOfSamples:(int)numberOfSamples {
+    _bpmDetect->inputSamples(data, numberOfSamples);
 }
 
 - (float)getBpm {
-    return bpmDetect->getBpm();
+    float value = _bpmDetect->getBpm();
+
+    if (value < 60) {
+        value *= 2;
+    }
+
+    return value;
 }
 
 - (void)dealloc {
-    if (bpmDetect) {
-        delete bpmDetect;
-        bpmDetect = nullptr;
+    std::cout << "dealloc BPMDetectC.mm" << std::endl;
+
+    if (_bpmDetect) {
+        delete _bpmDetect;
+        _bpmDetect = nullptr;
     }
 }
 

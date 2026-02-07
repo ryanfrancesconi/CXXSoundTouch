@@ -4,30 +4,30 @@ import Testing
 @testable import SoundTouchC
 
 final class CXXSoundTouchTests {
-    @Test func detect() async throws {
-        let url = URL(fileURLWithPath: "/Users/rf/Downloads/TestResources/formats/tabla.wav")
+    @Test func bpmDetect() async throws {
+        let url = URL(fileURLWithPath: "/Users/rf/Downloads/TestResources/bpm/110_drumloop.wav")
+
         let audioFile = try AVAudioFile(forReading: url)
         let frameCapacity = AVAudioFrameCount(audioFile.length)
-        
+
         guard let buffer = AVAudioPCMBuffer(
-            pcmFormat: audioFile.processingFormat, frameCapacity: frameCapacity) else {
+            pcmFormat: audioFile.processingFormat, frameCapacity: frameCapacity
+        ) else {
             Issue.record("failed to create buffer")
             return
         }
-        
+
+        // just read whole file into buffer for simple test here. you can pass sample buffers to the detect in chunks
+        // and it will assemble them.
         try audioFile.read(into: buffer)
 
+        guard let rawData = buffer.floatChannelData?.pointee else { return }
         let channelCount = Int32(audioFile.fileFormat.channelCount)
+        let sampleRate = Int32(audioFile.fileFormat.sampleRate)
 
-        let bpmDetect = BPMDetectC(
-            numberOfChannels: channelCount,
-            sampleRate: Int32(audioFile.fileFormat.sampleRate))
+        let bpmDetect = BPMDetectC()
 
-        guard let rawData = buffer.floatChannelData else { return }
-
-//        for n in 0 ..< channelCount {
-            bpmDetect.process(rawData[0], numberOfSamples: Int32(frameCapacity))
-//        }
+        bpmDetect.process(rawData, numberOfSamples: Int32(frameCapacity), numberOfChannels: channelCount, sampleRate: sampleRate)
 
         let value = bpmDetect.getBpm()
 

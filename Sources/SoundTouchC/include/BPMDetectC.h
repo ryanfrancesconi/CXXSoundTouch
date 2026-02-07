@@ -5,12 +5,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BPMDetectC : NSObject
 
-- (id)init;
+- (id)initWithSampleRate:(int)sampleRate numberOfChannels:(int)numberOfChannels;
 
-- (void)process:(const float *)data
-     numberOfSamples:(int)numberOfSamples
-    numberOfChannels:(int)numberOfChannels
-     sampleRate:(int)sampleRate;
+- (void)process:(const float *)data numberOfSamples:(int)numberOfSamples;
 
 - (float)getBpm;
 
