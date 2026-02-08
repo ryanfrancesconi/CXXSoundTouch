@@ -1,47 +1,27 @@
-// swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.2
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi
 
 import PackageDescription
 
 let package = Package(
     name: "CXXSoundTouch",
+    defaultLocalization: "en",
+    platforms: [.macOS(.v12), .iOS(.v15)],
     products: [
         .library(
             name: "SoundTouch",
             targets: [
-                "SoundTouch",
-                "SoundTouchC",
+                "SoundTouch"
             ]
         )
     ],
+    dependencies: [],
     targets: [
         .target(
             name: "SoundTouch",
             cxxSettings: [
                 .headerSearchPath("include")
-            ]),
-
-        .target(
-            name: "SoundTouchC",
-            dependencies: [
-                .target(name: "SoundTouch")
-            ],
-            publicHeadersPath: "include",
-            cSettings: [
-                .headerSearchPath("include"),
-                .headerSearchPath("include_private"),
-            ],
-            cxxSettings: [
-                .headerSearchPath("include"),
-                .headerSearchPath("include_private"),
-            ]
-        ),
-
-        .testTarget(
-            name: "CXXSoundTouchTests",
-            dependencies: [
-                "SoundTouchC"
-            ]),
+            ])
     ],
     cxxLanguageStandard: .cxx20
 )
