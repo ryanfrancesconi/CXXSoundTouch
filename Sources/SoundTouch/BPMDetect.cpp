@@ -55,14 +55,14 @@
 
 #define _USE_MATH_DEFINES
 
-#include "BPMDetect.h"
-#include "FIFOSampleBuffer.h"
-#include "PeakFinder.h"
 #include <assert.h>
 #include <cfloat>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "BPMDetect.h"
+#include "FIFOSampleBuffer.h"
+#include "PeakFinder.h"
 
 using namespace soundtouch;
 
@@ -168,9 +168,11 @@ float IIR2_filter::update(float x) {
 
 // IIR low-pass filter coefficients, calculated with matlab/octave
 // cheby2(2,40,0.05)
-const double _LPF_coeffs[5] = {0.00996655391939, -0.01944529148401,
-                               0.00996655391939, 1.96867605796247,
-                               -0.96916387431724};
+const double _LPF_coeffs[5] = {
+    0.00996655391939, -0.01944529148401,
+    0.00996655391939, 1.96867605796247,
+    -0.96916387431724
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -191,8 +193,7 @@ BPMDetect::BPMDetect(int numChannels, int aSampleRate) : beat_lpf(_LPF_coeffs) {
         ST_THROW_RT_ERROR("Too small samplerate");
     }
 
-    // Calculate window length & starting item according to desired min & max
-    // bpms
+    // Calculate window length & starting item according to desired min & max bpms
     windowLen = (60 * sampleRate) / (decimateBy * MIN_BPM);
     windowStart = (60 * sampleRate) / (decimateBy * MAX_BPM_RANGE);
 
@@ -299,8 +300,7 @@ void BPMDetect::updateXCorr(int process_samples) {
     pBuffer = buffer->ptrBegin();
 
     // calculate decay factor for xcorr filtering
-    float xcorr_decay = (float)pow(0.5, 1.0 / (XCORR_DECAY_TIME_CONSTANT *
-                                               TARGET_SRATE / process_samples));
+    float xcorr_decay = (float)pow(0.5, 1.0 / (XCORR_DECAY_TIME_CONSTANT * TARGET_SRATE / process_samples));
 
     // prescale pbuffer
     float tmp[XCORR_UPDATE_SEQUENCE];
@@ -392,8 +392,8 @@ void BPMDetect::updateBeatPos(int process_samples) {
 
             if (peakVal > 0) {
                 // add detected beat to end of "beats" vector
-                BEAT temp = {(float)(peakPos * posScale),
-                             (float)(peakVal * scale)};
+                BEAT temp = { (float)(peakPos * posScale),
+                              (float)(peakVal * scale) };
                 beats.push_back(temp);
             }
 

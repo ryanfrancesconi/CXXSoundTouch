@@ -196,7 +196,7 @@ class SoundTouch : public FIFOProcessor {
     /// processing so far
     long samplesOutput;
 
-    /// Calculates effective rate & tempo valuescfrom 'virtualRate',
+    /// Calculates effective rate & tempo values from 'virtualRate',
     /// 'virtualTempo' and 'virtualPitch' parameters.
     void calcEffectiveRateAndTempo();
 
